@@ -1,14 +1,19 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export function UnifiedAuthPage() {
+export function SignUpPage() {
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/admin/dashboard');
+    if (password !== confirmPassword) { setError('Passwords do not match.'); return; }
+    setError('');
+    navigate('/onboarding');
   };
 
   const inputClass = "w-full px-4 py-3 border border-[#d4d6db] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4d8b31] focus:border-transparent text-[#1e212b] text-sm";
@@ -21,13 +26,13 @@ export function UnifiedAuthPage() {
           <h1 className="text-2xl font-semibold text-[#1e212b] mb-1">
             Exit<span className="text-[#4d8b31]">Wise</span>
           </h1>
-          <p className="text-[#5c6270] text-sm">Sign in to your account</p>
+          <p className="text-[#5c6270] text-sm">Start preserving your organization's knowledge</p>
         </div>
 
         {/* Social Auth */}
         <div className="space-y-3 mb-6">
           <button
-            onClick={() => navigate('/admin/dashboard')}
+            onClick={() => navigate('/onboarding')}
             className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-[#d4d6db] rounded-lg text-[#1e212b] font-medium hover:bg-[#eef0f4] transition-colors text-sm"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -39,7 +44,7 @@ export function UnifiedAuthPage() {
             Continue with Google
           </button>
           <button
-            onClick={() => navigate('/admin/dashboard')}
+            onClick={() => navigate('/onboarding')}
             className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-[#d4d6db] rounded-lg text-[#1e212b] font-medium hover:bg-[#eef0f4] transition-colors text-sm"
           >
             <svg className="w-5 h-5" viewBox="0 0 23 23">
@@ -66,26 +71,40 @@ export function UnifiedAuthPage() {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-[#1e212b] mb-2">Email</label>
+            <label htmlFor="fullName" className="block text-sm font-medium text-[#1e212b] mb-2">Full Name</label>
+            <input id="fullName" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} className={inputClass} placeholder="Jane Smith" required />
+          </div>
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-[#1e212b] mb-2">Work Email</label>
             <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} placeholder="you@company.com" required />
           </div>
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-[#1e212b] mb-2">Password</label>
-            <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} placeholder="Enter your password" required />
+            <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} placeholder="Create a password" required />
+          </div>
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-[#1e212b] mb-2">Confirm Password</label>
+            <input
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => { setConfirmPassword(e.target.value); setError(''); }}
+              className={`${inputClass} ${error ? 'border-red-400 focus:ring-red-400' : ''}`}
+              placeholder="Repeat your password"
+              required
+            />
+            {error && <p className="mt-1.5 text-sm text-red-500">{error}</p>}
           </div>
           <button type="submit" className="w-full py-3 bg-[#4d8b31] text-white rounded-lg font-medium hover:bg-[#3d7026] transition-colors mt-6 text-sm">
-            Log in
+            Create Account
           </button>
         </form>
 
-        <div className="mt-6 text-center space-y-2">
-          <button onClick={() => navigate('/forgot-password')} className="block w-full text-sm text-[#5c6270] hover:text-[#1e212b] transition-colors">
-            Forgot your password?
-          </button>
+        <div className="mt-6 text-center">
           <div className="text-sm text-[#5c6270]">
-            Don't have an account?{' '}
-            <button onClick={() => navigate('/signup')} className="text-[#4d8b31] hover:underline font-medium">
-              Sign up
+            Already have an account?{' '}
+            <button onClick={() => navigate('/auth')} className="text-[#4d8b31] hover:underline font-medium">
+              Log in
             </button>
           </div>
         </div>

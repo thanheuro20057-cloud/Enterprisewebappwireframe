@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, Users, FileText, Settings, BarChart3, LogOut } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { MessageCircle } from 'lucide-react';
+import { AdminSidebar } from './AdminSidebar';
 
 const chartData = [
   { day: 'Day 1', transfers: 12 },
@@ -20,146 +21,142 @@ const employees = [
   { name: 'Linda Davis', department: 'HR', successor: 'John Smith', status: 'Completed', progress: 100 },
 ];
 
-export function AdminDashboardWithChart() {
-  const navigate = useNavigate();
+function SimpleLineChart({ data }: { data: { day: string; transfers: number }[] }) {
+  const [tooltip, setTooltip] = useState<{ x: number; y: number; value: number; label: string } | null>(null);
+
+  const width = 600;
+  const height = 260;
+  const paddingLeft = 48;
+  const paddingRight = 24;
+  const paddingTop = 16;
+  const paddingBottom = 40;
+
+  const chartW = width - paddingLeft - paddingRight;
+  const chartH = height - paddingTop - paddingBottom;
+
+  const maxVal = Math.max(...data.map((d) => d.transfers));
+  const minVal = 0;
+  const range = maxVal - minVal || 1;
+
+  const toX = (i: number) => paddingLeft + (i / (data.length - 1)) * chartW;
+  const toY = (v: number) => paddingTop + chartH - ((v - minVal) / range) * chartH;
+
+  const points = data.map((d, i) => ({ x: toX(i), y: toY(d.transfers), ...d }));
+  const polyline = points.map((p) => `${p.x},${p.y}`).join(' ');
+
+  const yTicks = [0, Math.round(maxVal * 0.25), Math.round(maxVal * 0.5), Math.round(maxVal * 0.75), maxVal];
 
   return (
-    <div className="flex h-screen bg-[#f2f2f2]">
-      {/* Sidebar */}
-      <div className="w-64 bg-white border-r border-[#cccccc] flex flex-col">
-        <div className="p-6 border-b border-[#cccccc]">
-          <h1 className="text-xl font-semibold text-[#595959]">ExitWise</h1>
+    <div className="relative w-full" style={{ height }}>
+      <svg viewBox={`0 0 ${width} ${height}`} width="100%" height={height} preserveAspectRatio="xMidYMid meet">
+        {yTicks.map((tick, i) => {
+          const y = toY(tick);
+          return (
+            <g key={`ytick-${i}`}>
+              <line x1={paddingLeft} y1={y} x2={width - paddingRight} y2={y} stroke="#d4d6db" strokeWidth={1} strokeDasharray="3 3" />
+              <text x={paddingLeft - 8} y={y + 4} textAnchor="end" fontSize={11} fill="#5c6270">{tick}</text>
+            </g>
+          );
+        })}
+        {points.map((p, i) => (
+          <text key={`xlabel-${i}`} x={p.x} y={height - 8} textAnchor="middle" fontSize={11} fill="#5c6270">{p.day}</text>
+        ))}
+        <polyline points={polyline} fill="none" stroke="#4d8b31" strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />
+        {points.map((p, i) => (
+          <circle
+            key={`dot-${i}`}
+            cx={p.x} cy={p.y} r={4}
+            fill="#4d8b31" stroke="white" strokeWidth={2}
+            style={{ cursor: 'pointer' }}
+            onMouseEnter={() => setTooltip({ x: p.x, y: p.y, value: p.transfers, label: p.day })}
+            onMouseLeave={() => setTooltip(null)}
+          />
+        ))}
+      </svg>
+      {tooltip && (
+        <div
+          className="absolute pointer-events-none bg-white border border-[#d4d6db] rounded-md px-3 py-2 text-sm text-[#1e212b] shadow-sm"
+          style={{ left: `${(tooltip.x / width) * 100}%`, top: tooltip.y - 48, transform: 'translateX(-50%)' }}
+        >
+          <div className="text-[#5c6270] text-xs">{tooltip.label}</div>
+          <div className="font-medium">{tooltip.value} transfers</div>
         </div>
+      )}
+    </div>
+  );
+}
 
-        <nav className="flex-1 p-4">
-          <div className="space-y-1">
-            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-md bg-[#f2f2f2] text-[#595959] font-medium">
-              <Home className="w-5 h-5" />
-              Dashboard
-            </button>
-            <button
-              onClick={() => navigate('/admin/dashboard-alt')}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-md text-[#7f7f7f] hover:bg-[#f2f2f2] hover:text-[#595959]"
-            >
-              <BarChart3 className="w-5 h-5" />
-              Dashboard Alt
-            </button>
-            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-md text-[#7f7f7f] hover:bg-[#f2f2f2] hover:text-[#595959]">
-              <Users className="w-5 h-5" />
-              Employees
-            </button>
-            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-md text-[#7f7f7f] hover:bg-[#f2f2f2] hover:text-[#595959]">
-              <FileText className="w-5 h-5" />
-              Knowledge Base
-            </button>
-            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-md text-[#7f7f7f] hover:bg-[#f2f2f2] hover:text-[#595959]">
-              <Settings className="w-5 h-5" />
-              Settings
-            </button>
-          </div>
-        </nav>
+export function AdminDashboardWithChart({ userType = 'retiree' }: { userType?: 'retiree' | 'successor' }) {
+  const navigate = useNavigate();
+  const [isHovered, setIsHovered] = useState(false);
 
-        <div className="p-4 border-t border-[#cccccc]">
-          <button
-            onClick={() => navigate('/')}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-md text-[#7f7f7f] hover:bg-[#f2f2f2] hover:text-[#595959]"
-          >
-            <LogOut className="w-5 h-5" />
-            Sign Out
-          </button>
-        </div>
-      </div>
+  const chatPath = userType === 'successor' ? '/successor/chatbox' : '/retiree/interview';
+  const bubbleText = userType === 'retiree'
+    ? "Let's transfer your knowledge"
+    : "Let's get to know what your predecessor left behind";
 
-      {/* Main Content */}
+  return (
+    <div className="flex h-screen bg-[#eef0f4]">
+      <AdminSidebar userType={userType} />
+
       <div className="flex-1 overflow-auto">
         <div className="p-8">
-          <h2 className="text-3xl font-semibold text-[#595959] mb-8">Dashboard Overview</h2>
+          <h2 className="text-3xl font-semibold text-[#1e212b] mb-8">Dashboard Overview</h2>
 
           {/* Metric Cards */}
           <div className="grid grid-cols-3 gap-6 mb-8">
-            <div className="bg-white rounded-lg border border-[#cccccc] p-6">
-              <div className="text-sm text-[#7f7f7f] mb-1">Active Transfers</div>
-              <div className="text-3xl font-semibold text-[#595959]">24</div>
-              <div className="text-sm text-[#7f7f7f] mt-2">+8% from last month</div>
+            <div className="bg-white rounded-lg border border-[#d4d6db] p-6">
+              <div className="text-sm text-[#5c6270] mb-1">Active Transfers</div>
+              <div className="text-3xl font-semibold text-[#1e212b]">24</div>
+              <div className="text-sm text-[#5c6270] mt-2">+8% from last month</div>
             </div>
-            <div className="bg-white rounded-lg border border-[#cccccc] p-6">
-              <div className="text-sm text-[#7f7f7f] mb-1">Completed Transfers</div>
-              <div className="text-3xl font-semibold text-[#595959]">78</div>
-              <div className="text-sm text-[#7f7f7f] mt-2">+15% from last month</div>
+            <div className="bg-white rounded-lg border border-[#d4d6db] p-6">
+              <div className="text-sm text-[#5c6270] mb-1">Completed Transfers</div>
+              <div className="text-3xl font-semibold text-[#1e212b]">78</div>
+              <div className="text-sm text-[#5c6270] mt-2">+15% from last month</div>
             </div>
-            <div className="bg-white rounded-lg border border-[#cccccc] p-6">
-              <div className="text-sm text-[#7f7f7f] mb-1">Completion Rate</div>
-              <div className="text-3xl font-semibold text-[#595959]">87%</div>
-              <div className="text-sm text-[#7f7f7f] mt-2">+3% from last month</div>
+            <div className="bg-white rounded-lg border border-[#d4d6db] p-6">
+              <div className="text-sm text-[#5c6270] mb-1">Completion Rate</div>
+              <div className="text-3xl font-semibold text-[#1e212b]">87%</div>
+              <div className="text-sm text-[#5c6270] mt-2">+3% from last month</div>
             </div>
           </div>
 
           {/* Chart Section */}
-          <div className="bg-white rounded-lg border border-[#cccccc] p-6 mb-8">
-            <h3 className="text-lg font-semibold text-[#595959] mb-6">
+          <div className="bg-white rounded-lg border border-[#d4d6db] p-6 mb-8">
+            <h3 className="text-lg font-semibold text-[#1e212b] mb-6">
               Knowledge Transfer Progress (30 Days)
             </h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#cccccc" />
-                <XAxis dataKey="day" stroke="#7f7f7f" style={{ fontSize: '12px' }} />
-                <YAxis stroke="#7f7f7f" style={{ fontSize: '12px' }} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'white',
-                    border: '1px solid #cccccc',
-                    borderRadius: '6px',
-                  }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="transfers"
-                  stroke="#595959"
-                  strokeWidth={2}
-                  dot={{ fill: '#595959', r: 4 }}
-                  activeDot={{ r: 6 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            <SimpleLineChart data={chartData} />
           </div>
 
           {/* Table Section */}
-          <div className="bg-white rounded-lg border border-[#cccccc] p-6">
-            <h3 className="text-lg font-semibold text-[#595959] mb-6">Recent Transfers</h3>
+          <div className="bg-white rounded-lg border border-[#d4d6db] p-6">
+            <h3 className="text-lg font-semibold text-[#1e212b] mb-6">Recent Transfers</h3>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-[#cccccc]">
-                    <th className="text-left py-3 px-4 text-sm font-medium text-[#595959]">
-                      Employee
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-[#595959]">
-                      Department
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-[#595959]">
-                      Successor
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-[#595959]">
-                      Status
-                    </th>
+                  <tr className="border-b border-[#d4d6db]">
+                    <th className="text-left py-3 px-4 text-sm font-medium text-[#1e212b]">Employee</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-[#1e212b]">Department</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-[#1e212b]">Successor</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-[#1e212b]">Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {employees.map((employee, idx) => (
-                    <tr key={idx} className="border-b border-[#cccccc] last:border-0">
-                      <td className="py-3 px-4 text-[#595959]">{employee.name}</td>
-                      <td className="py-3 px-4 text-[#7f7f7f]">{employee.department}</td>
-                      <td className="py-3 px-4 text-[#7f7f7f]">{employee.successor}</td>
+                  {employees.map((employee) => (
+                    <tr key={employee.name} className="border-b border-[#d4d6db] last:border-0">
+                      <td className="py-3 px-4 text-[#1e212b]">{employee.name}</td>
+                      <td className="py-3 px-4 text-[#5c6270]">{employee.department}</td>
+                      <td className="py-3 px-4 text-[#5c6270]">{employee.successor}</td>
                       <td className="py-3 px-4">
-                        <span
-                          className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-                            employee.status === 'Completed'
-                              ? 'bg-[#595959] text-white'
-                              : employee.status === 'In Progress'
-                              ? 'bg-[#f2f2f2] text-[#595959] border border-[#cccccc]'
-                              : 'bg-white text-[#7f7f7f] border border-[#cccccc]'
-                          }`}
-                        >
+                        <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
+                          employee.status === 'Completed'
+                            ? 'bg-[#4d8b31] text-white'
+                            : employee.status === 'In Progress'
+                            ? 'bg-[#fff4d6] text-[#1e212b] border border-[#ffc800]'
+                            : 'bg-[#fff3ec] text-[#ff8427] border border-[#ff8427]/40'
+                        }`}>
                           {employee.status}
                         </span>
                       </td>
@@ -169,6 +166,23 @@ export function AdminDashboardWithChart() {
               </table>
             </div>
           </div>
+        </div>
+
+        {/* Floating Bubble */}
+        <div
+          className="fixed bottom-8 right-8 z-50"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          <button
+            onClick={() => navigate(chatPath)}
+            className={`flex items-center gap-3 bg-[#4d8b31] text-white rounded-full shadow-lg transition-all duration-300 ease-in-out ${isHovered ? 'px-6 py-4' : 'p-4'} hover:bg-[#3d7026]`}
+          >
+            <MessageCircle className="w-6 h-6 flex-shrink-0" />
+            <span className={`whitespace-nowrap overflow-hidden transition-all duration-300 ${isHovered ? 'max-w-xs opacity-100' : 'max-w-0 opacity-0'}`}>
+              {bubbleText}
+            </span>
+          </button>
         </div>
       </div>
     </div>

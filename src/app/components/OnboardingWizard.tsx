@@ -16,21 +16,18 @@ export function OnboardingWizard() {
   const navigate = useNavigate();
 
   const handleNext = () => {
-    if (currentStep < steps.length) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      navigate('/admin/dashboard');
-    }
+    if (currentStep < steps.length) setCurrentStep(currentStep + 1);
+    else navigate('/admin/dashboard');
   };
 
   const handleBack = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
+    if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
+  const inputClass = "w-full px-3 py-2 border border-[#d4d6db] rounded-md focus:outline-none focus:ring-2 focus:ring-[#4d8b31] focus:border-transparent text-[#1e212b] text-sm";
+
   return (
-    <div className="min-h-screen bg-[#f2f2f2] flex items-center justify-center p-8">
+    <div className="min-h-screen bg-[#eef0f4] flex items-center justify-center p-8">
       <div className="w-full max-w-2xl">
         {/* Stepper */}
         <div className="mb-12">
@@ -41,10 +38,10 @@ export function OnboardingWizard() {
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
                       step.id < currentStep
-                        ? 'bg-[#595959] border-[#595959] text-white'
+                        ? 'bg-[#4d8b31] border-[#4d8b31] text-white'
                         : step.id === currentStep
-                        ? 'bg-white border-[#595959] text-[#595959]'
-                        : 'bg-white border-[#cccccc] text-[#a5a5a5]'
+                        ? 'bg-white border-[#4d8b31] text-[#4d8b31]'
+                        : 'bg-white border-[#d4d6db] text-[#9ea3b0]'
                     }`}
                   >
                     {step.id < currentStep ? (
@@ -54,22 +51,14 @@ export function OnboardingWizard() {
                     )}
                   </div>
                   <div className="mt-2 text-center">
-                    <div
-                      className={`text-sm font-medium ${
-                        step.id <= currentStep ? 'text-[#595959]' : 'text-[#a5a5a5]'
-                      }`}
-                    >
+                    <div className={`text-sm font-medium ${step.id <= currentStep ? 'text-[#1e212b]' : 'text-[#9ea3b0]'}`}>
                       {step.name}
                     </div>
-                    <div className="text-xs text-[#7f7f7f]">{step.description}</div>
+                    <div className="text-xs text-[#5c6270]">{step.description}</div>
                   </div>
                 </div>
                 {idx < steps.length - 1 && (
-                  <div
-                    className={`h-0.5 flex-1 mx-2 mb-12 ${
-                      step.id < currentStep ? 'bg-[#595959]' : 'bg-[#cccccc]'
-                    }`}
-                  />
+                  <div className={`h-0.5 flex-1 mx-2 mb-12 ${step.id < currentStep ? 'bg-[#4d8b31]' : 'bg-[#d4d6db]'}`} />
                 )}
               </div>
             ))}
@@ -77,23 +66,19 @@ export function OnboardingWizard() {
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-lg border border-[#cccccc] p-8 shadow-sm">
+        <div className="bg-white rounded-lg border border-[#d4d6db] p-8 shadow-sm">
           {currentStep === 1 && (
             <div>
-              <h2 className="text-2xl font-semibold text-[#595959] mb-6">
-                Organization Details
-              </h2>
+              <h2 className="text-2xl font-semibold text-[#1e212b] mb-6">Organization Details</h2>
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="orgName" className="block text-sm font-medium text-[#595959] mb-2">
-                    Organization Name
-                  </label>
+                  <label htmlFor="orgName" className="block text-sm font-medium text-[#1e212b] mb-2">Organization Name</label>
                   <input
                     id="orgName"
                     type="text"
                     value={orgName}
                     onChange={(e) => setOrgName(e.target.value)}
-                    className="w-full px-3 py-2 border border-[#cccccc] rounded-md focus:outline-none focus:ring-2 focus:ring-[#595959] focus:border-transparent text-[#595959]"
+                    className={inputClass}
                     placeholder="Enter your organization name"
                   />
                 </div>
@@ -103,26 +88,21 @@ export function OnboardingWizard() {
 
           {currentStep === 2 && (
             <div>
-              <h2 className="text-2xl font-semibold text-[#595959] mb-6">Team Setup</h2>
-
-              {/* Alert Box */}
-              <div className="mb-6 p-4 rounded-md border border-[#7f7f7f] bg-[#f2f2f2] flex gap-3">
-                <Info className="w-5 h-5 text-[#7f7f7f] flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-[#595959]">
+              <h2 className="text-2xl font-semibold text-[#1e212b] mb-6">Team Setup</h2>
+              <div className="mb-6 p-4 rounded-md border border-[#d4d6db] bg-[#eef0f4] flex gap-3">
+                <Info className="w-5 h-5 text-[#5c6270] flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-[#1e212b]">
                   <span className="font-medium">Tip:</span> You can invite team members now or add them later from your dashboard settings.
                 </div>
               </div>
-
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="inviteEmails" className="block text-sm font-medium text-[#595959] mb-2">
-                    Invite Team Members
-                  </label>
+                  <label htmlFor="inviteEmails" className="block text-sm font-medium text-[#1e212b] mb-2">Invite Team Members</label>
                   <textarea
                     id="inviteEmails"
                     value={inviteEmails}
                     onChange={(e) => setInviteEmails(e.target.value)}
-                    className="w-full px-3 py-2 border border-[#cccccc] rounded-md focus:outline-none focus:ring-2 focus:ring-[#595959] focus:border-transparent text-[#595959] min-h-32"
+                    className={`${inputClass} min-h-32`}
                     placeholder="Enter email addresses (one per line)"
                   />
                 </div>
@@ -132,18 +112,13 @@ export function OnboardingWizard() {
 
           {currentStep === 3 && (
             <div>
-              <h2 className="text-2xl font-semibold text-[#595959] mb-6">Integration</h2>
-              <p className="text-[#7f7f7f] mb-4">
-                Connect your tools to streamline knowledge capture and sharing.
-              </p>
+              <h2 className="text-2xl font-semibold text-[#1e212b] mb-6">Integration</h2>
+              <p className="text-[#5c6270] mb-4 text-sm">Connect your tools to streamline knowledge capture and sharing.</p>
               <div className="space-y-3">
                 {['Slack', 'Microsoft Teams', 'Google Workspace'].map((tool) => (
-                  <div
-                    key={tool}
-                    className="p-4 border border-[#cccccc] rounded-md flex items-center justify-between hover:bg-[#f2f2f2] cursor-pointer"
-                  >
-                    <span className="text-[#595959] font-medium">{tool}</span>
-                    <button className="px-4 py-2 text-sm border border-[#cccccc] rounded-md text-[#595959] hover:bg-[#f2f2f2]">
+                  <div key={tool} className="p-4 border border-[#d4d6db] rounded-md flex items-center justify-between hover:bg-[#eef0f4] cursor-pointer">
+                    <span className="text-[#1e212b] font-medium text-sm">{tool}</span>
+                    <button className="px-4 py-2 text-sm border border-[#d4d6db] rounded-md text-[#1e212b] hover:border-[#4d8b31] hover:text-[#4d8b31] transition-colors">
                       Connect
                     </button>
                   </div>
@@ -154,15 +129,15 @@ export function OnboardingWizard() {
 
           {currentStep === 4 && (
             <div>
-              <h2 className="text-2xl font-semibold text-[#595959] mb-6">Review & Confirm</h2>
+              <h2 className="text-2xl font-semibold text-[#1e212b] mb-6">Review & Confirm</h2>
               <div className="space-y-4">
-                <div className="p-4 bg-[#f2f2f2] rounded-md">
-                  <div className="text-sm text-[#7f7f7f] mb-1">Organization</div>
-                  <div className="text-[#595959] font-medium">{orgName || 'Not provided'}</div>
+                <div className="p-4 bg-[#eef0f4] rounded-md border border-[#d4d6db]">
+                  <div className="text-sm text-[#5c6270] mb-1">Organization</div>
+                  <div className="text-[#1e212b] font-medium">{orgName || 'Not provided'}</div>
                 </div>
-                <div className="p-4 bg-[#f2f2f2] rounded-md">
-                  <div className="text-sm text-[#7f7f7f] mb-1">Team Members</div>
-                  <div className="text-[#595959] font-medium">
+                <div className="p-4 bg-[#eef0f4] rounded-md border border-[#d4d6db]">
+                  <div className="text-sm text-[#5c6270] mb-1">Team Members</div>
+                  <div className="text-[#1e212b] font-medium">
                     {inviteEmails ? inviteEmails.split('\n').filter(e => e.trim()).length + ' invited' : 'None'}
                   </div>
                 </div>
@@ -175,14 +150,14 @@ export function OnboardingWizard() {
             {currentStep > 1 && (
               <button
                 onClick={handleBack}
-                className="px-6 py-2 border border-[#cccccc] rounded-md text-[#595959] hover:bg-[#f2f2f2] transition-colors"
+                className="px-6 py-2 border border-[#d4d6db] rounded-md text-[#1e212b] hover:bg-[#eef0f4] transition-colors text-sm"
               >
                 Back
               </button>
             )}
             <button
               onClick={handleNext}
-              className="ml-auto px-6 py-2 bg-[#595959] text-white rounded-md hover:bg-[#454545] transition-colors"
+              className="ml-auto px-6 py-2 bg-[#4d8b31] text-white rounded-md hover:bg-[#3d7026] transition-colors text-sm"
             >
               {currentStep === steps.length ? 'Complete Setup' : 'Next'}
             </button>

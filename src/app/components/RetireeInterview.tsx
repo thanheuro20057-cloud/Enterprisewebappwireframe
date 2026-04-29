@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Send, Mic, Check, LogOut } from 'lucide-react';
+import { Send, Mic, Check, ArrowLeft, MessageSquare, LayoutDashboard } from 'lucide-react';
 
 const topics = [
   { name: 'Safety Procedures', completed: true },
@@ -33,88 +33,114 @@ const initialMessages = [
 export function RetireeInterview() {
   const [messages, setMessages] = useState(initialMessages);
   const [inputValue, setInputValue] = useState('');
+  const [activeTab, setActiveTab] = useState<'chat' | 'dashboard'>('chat');
   const navigate = useNavigate();
+
+  const handleTabChange = (tab: 'chat' | 'dashboard') => {
+    setActiveTab(tab);
+    if (tab === 'dashboard') navigate('/admin/dashboard');
+  };
 
   const handleSend = () => {
     if (inputValue.trim()) {
       setMessages([...messages, { role: 'user', content: inputValue }]);
       setInputValue('');
-
       setTimeout(() => {
         setMessages((prev) => [
           ...prev,
-          {
-            role: 'ai',
-            content: 'Thank you for sharing that. This is exactly the kind of practical knowledge that will be invaluable. Do you have any other workarounds or tips related to vendor management?',
-          },
+          { role: 'ai', content: 'Thank you for sharing that. This is exactly the kind of practical knowledge that will be invaluable. Do you have any other workarounds or tips related to vendor management?' },
         ]);
       }, 1000);
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
   return (
-    <div className="flex h-screen bg-[#f2f2f2]">
-      {/* Topics Sidebar */}
-      <div className="w-80 bg-white border-r border-[#cccccc] flex flex-col">
-        <div className="p-6 border-b border-[#cccccc]">
-          <h1 className="text-xl font-semibold text-[#595959] mb-1">Knowledge Interview</h1>
-          <p className="text-sm text-[#7f7f7f]">Robert Martinez</p>
+    <div className="flex h-screen bg-[#eef0f4]">
+      {/* Sidebar */}
+      <div className="w-80 bg-white border-r border-[#d4d6db] flex flex-col">
+        <div className="p-6 border-b border-[#d4d6db]">
+          <h1 className="text-xl font-semibold text-[#1e212b] mb-1">
+            Exit<span className="text-[#4d8b31]">Wise</span>
+          </h1>
+          <p className="text-sm text-[#5c6270]">Robert Martinez</p>
         </div>
 
+        {/* Nav Tabs */}
+        <div className="border-b border-[#d4d6db] p-4">
+          <div className="space-y-1">
+            <button
+              onClick={() => handleTabChange('dashboard')}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-md text-sm transition-colors ${
+                activeTab === 'dashboard'
+                  ? 'bg-[#4d8b31] text-white font-medium'
+                  : 'text-[#5c6270] hover:bg-[#eef0f4] hover:text-[#1e212b]'
+              }`}
+            >
+              <LayoutDashboard className="w-5 h-5" />
+              Dashboard
+            </button>
+            <button
+              onClick={() => handleTabChange('chat')}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-md text-sm transition-colors ${
+                activeTab === 'chat'
+                  ? 'bg-[#4d8b31] text-white font-medium'
+                  : 'text-[#5c6270] hover:bg-[#eef0f4] hover:text-[#1e212b]'
+              }`}
+            >
+              <MessageSquare className="w-5 h-5" />
+              Interview
+            </button>
+          </div>
+        </div>
+
+        {/* Topics */}
         <div className="flex-1 p-6 overflow-auto">
-          <h2 className="text-sm font-medium text-[#7f7f7f] mb-4">Topics to Cover</h2>
+          <h2 className="text-sm font-medium text-[#5c6270] mb-4">Topics to Cover</h2>
           <div className="space-y-2">
             {topics.map((topic, idx) => (
               <div
                 key={idx}
                 className={`p-3 rounded-md border flex items-center gap-3 ${
                   topic.completed
-                    ? 'bg-[#f2f2f2] border-[#cccccc]'
-                    : 'bg-white border-[#cccccc] hover:bg-[#f2f2f2] cursor-pointer'
+                    ? 'bg-[#eef0f4] border-[#d4d6db]'
+                    : 'bg-white border-[#d4d6db] hover:bg-[#eef0f4] cursor-pointer'
                 }`}
               >
                 {topic.completed ? (
-                  <div className="w-5 h-5 rounded-full bg-[#595959] flex items-center justify-center flex-shrink-0">
+                  <div className="w-5 h-5 rounded-full bg-[#4d8b31] flex items-center justify-center flex-shrink-0">
                     <Check className="w-3 h-3 text-white" />
                   </div>
                 ) : (
-                  <div className="w-5 h-5 rounded-full border-2 border-[#cccccc] flex-shrink-0" />
+                  <div className="w-5 h-5 rounded-full border-2 border-[#d4d6db] flex-shrink-0" />
                 )}
-                <span
-                  className={`text-sm ${
-                    topic.completed ? 'text-[#7f7f7f] line-through' : 'text-[#595959]'
-                  }`}
-                >
+                <span className={`text-sm ${topic.completed ? 'text-[#9ea3b0] line-through' : 'text-[#1e212b]'}`}>
                   {topic.name}
                 </span>
               </div>
             ))}
           </div>
 
-          <div className="mt-8 p-4 bg-[#f2f2f2] rounded-md border border-[#cccccc]">
-            <div className="text-sm text-[#7f7f7f] mb-1">Progress</div>
+          <div className="mt-8 p-4 bg-[#eef0f4] rounded-md border border-[#d4d6db]">
+            <div className="text-sm text-[#5c6270] mb-1">Progress</div>
             <div className="flex items-center gap-3">
-              <div className="flex-1 h-2 bg-white rounded-full overflow-hidden border border-[#cccccc]">
-                <div className="h-full bg-[#595959] rounded-full" style={{ width: '33%' }} />
+              <div className="flex-1 h-2 bg-white rounded-full overflow-hidden border border-[#d4d6db]">
+                <div className="h-full bg-[#4d8b31] rounded-full" style={{ width: '33%' }} />
               </div>
-              <span className="text-sm font-medium text-[#595959]">2/6</span>
+              <span className="text-sm font-medium text-[#1e212b]">2/6</span>
             </div>
           </div>
         </div>
 
-        <div className="p-4 border-t border-[#cccccc]">
+        <div className="p-4 border-t border-[#d4d6db]">
           <button
-            onClick={() => navigate('/')}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-md text-[#7f7f7f] hover:bg-[#f2f2f2] hover:text-[#595959]"
+            onClick={() => navigate('/admin/dashboard')}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-md text-[#5c6270] hover:bg-[#eef0f4] hover:text-[#1e212b] text-sm transition-colors"
           >
-            <LogOut className="w-5 h-5" />
+            <ArrowLeft className="w-5 h-5" />
             Exit Interview
           </button>
         </div>
@@ -122,33 +148,26 @@ export function RetireeInterview() {
 
       {/* Chat Area */}
       <div className="flex-1 flex flex-col">
-        {/* Chat Header */}
-        <div className="bg-white border-b border-[#cccccc] p-6">
-          <h2 className="text-lg font-semibold text-[#595959]">Common Workarounds</h2>
-          <p className="text-sm text-[#7f7f7f] mt-1">
-            Share the unofficial processes and creative solutions you've developed
-          </p>
+        <div className="bg-white border-b border-[#d4d6db] p-6">
+          <h2 className="text-lg font-semibold text-[#1e212b]">Common Workarounds</h2>
+          <p className="text-sm text-[#5c6270] mt-1">Share the unofficial processes and creative solutions you've developed</p>
         </div>
 
-        {/* Messages */}
         <div className="flex-1 overflow-auto p-6 space-y-4">
           {messages.map((message, idx) => (
             <div key={idx} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div
-                className={`max-w-2xl rounded-lg px-4 py-3 ${
-                  message.role === 'ai'
-                    ? 'bg-white border border-[#cccccc] text-[#595959]'
-                    : 'bg-[#595959] text-white'
-                }`}
-              >
+              <div className={`max-w-2xl rounded-lg px-4 py-3 text-sm ${
+                message.role === 'ai'
+                  ? 'bg-white border border-[#d4d6db] text-[#1e212b]'
+                  : 'bg-[#1e212b] text-white'
+              }`}>
                 {message.content}
               </div>
             </div>
           ))}
         </div>
 
-        {/* Input Area */}
-        <div className="bg-white border-t border-[#cccccc] p-6">
+        <div className="bg-white border-t border-[#d4d6db] p-6">
           <div className="flex items-end gap-3">
             <div className="flex-1 relative">
               <input
@@ -157,15 +176,15 @@ export function RetireeInterview() {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Type your response..."
-                className="w-full px-4 py-3 border border-[#cccccc] rounded-md focus:outline-none focus:ring-2 focus:ring-[#595959] focus:border-transparent text-[#595959] pr-12"
+                className="w-full px-4 py-3 border border-[#d4d6db] rounded-md focus:outline-none focus:ring-2 focus:ring-[#4d8b31] focus:border-transparent text-[#1e212b] pr-12 text-sm"
               />
-              <button className="absolute right-3 top-1/2 -translate-y-1/2 text-[#7f7f7f] hover:text-[#595959]">
+              <button className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9ea3b0] hover:text-[#1e212b]">
                 <Mic className="w-5 h-5" />
               </button>
             </div>
             <button
               onClick={handleSend}
-              className="p-3 bg-[#595959] text-white rounded-md hover:bg-[#454545] transition-colors"
+              className="p-3 bg-[#4d8b31] text-white rounded-md hover:bg-[#3d7026] transition-colors"
             >
               <Send className="w-5 h-5" />
             </button>
